@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,7 +12,7 @@
 #include "graphics/rendering/Shader.h"
 #include "io/Keyboard.h"
 #include "io/Mouse.h"
-#include "io/Joystick.h"
+#include "io/Gamepad.h"
 
 unsigned int SCR_WIDTH = 800;
 unsigned int SCR_HEIGHT = 600;
@@ -26,10 +27,10 @@ float mixVal = 0.5f;
 
 glm::mat4 transform = glm::mat4(1.0f);
 
-Joystick mainJ(0);
+Gamepad gpad(0);
 
 float x, y, z;
-float theta = 0.0f;
+float theta = 45.0f;
 
 int main() {
 	// Inicializacion de glfw
@@ -53,6 +54,16 @@ int main() {
 		return -1;
 	}
 
+	// gamepad
+	std::ifstream t("resources/game/data/gamecontroller.db");
+	std::string mappings((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+	auto mappingSuccess = glfwUpdateGamepadMappings(mappings.c_str());
+	if (mappingSuccess == GLFW_TRUE) {
+		std::cout << "Mapped" << std::endl;
+	}
+	else {
+		std::cout << "Not mapped" << std::endl;
+	}
 
 	// callbacks
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -178,9 +189,9 @@ int main() {
 	shader.setInt("texture1", 0);
 	shader.setInt("texture2", 1);
 
-	mainJ.update();
-	if (mainJ.isPresent()) {
-		std::cout << mainJ.getName() << " is present." << std::endl;
+	gpad.update();
+	if (gpad.isPresent()) {
+		std::cout << gpad.getName() << " is present." << std::endl;
 	}
 	else {
 		std::cout << "Not present." << std::endl;
@@ -213,7 +224,7 @@ int main() {
 
 		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(-55.0f), glm::vec3(0.5f));
 		view = glm::translate(view, glm::vec3(-x, -y, -z));
-		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(theta), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 		shader.activate();
 
@@ -256,7 +267,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window) {
-	if (Keyboard::key(GLFW_KEY_ESCAPE) || mainJ.buttonState(GLFW_GAMEPAD_BUTTON_B))
+	if (Keyboard::key(GLFW_KEY_ESCAPE) || gpad.buttonState(GLFW_GAMEPAD_BUTTON_B) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
 	// change mixVal
@@ -292,25 +303,33 @@ void processInput(GLFWwindow* window) {
 		transform = glm::translate(transform, glm::vec3(0.1f, 0.0f, 0.0f));
 	}*/
 
-	mainJ.update();
+	gpad.update();
 
-	float lx = -mainJ.axesState(GLFW_GAMEPAD_AXIS_LEFT_X);
-	float ly = mainJ.axesState(GLFW_GAMEPAD_AXIS_LEFT_Y);
+	float lx = -gpad.axesState(GLFW_GAMEPAD_AXIS_LEFT_X);
+	float ly = -gpad.axesState(GLFW_GAMEPAD_AXIS_LEFT_Y);
 
-	if (std::abs(lx) > 0.5f) {
-		x += lx / 50.0f;
+	if (std::abs(lx) > 0.1f) {
+		x += lx / 25.0f;
 	}
-	if (std::abs(ly) > 0.5f) {
-		z += ly / 50.0f;
+	if (std::abs(ly) > 0.1f) {
+		z += ly / 25.0f;
 	}
 
-	if (mainJ.buttonState(12) == GLFW_PRESS) {
+	if (gpad.buttonState(GLFW_GAMEPAD_BUTTON_DPAD_DOWN) == GLFW_PRESS) {
 		y += 0.25f;
 	}
 
-	if (mainJ.buttonState(10) == GLFW_PRESS) {
+	if (gpad.buttonState(GLFW_GAMEPAD_BUTTON_DPAD_UP) == GLFW_PRESS) {
 		y -= 0.25f;
 	}
 
+	float rt = gpad.axesState(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER) / 2.0f + 0.5f;
+	if (rt > 0.1f) {
+		theta -= 0.1f;
+	}
 
+	float lt = gpad.axesState(GLFW_GAMEPAD_AXIS_LEFT_TRIGGER) / 2.0f + 0.5f;
+	if (lt > 0.1f) {
+		theta += 0.1f;
+	}
 }

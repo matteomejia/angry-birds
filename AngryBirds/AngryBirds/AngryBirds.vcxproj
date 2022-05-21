@@ -22,6 +22,7 @@
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="src\graphics\rendering\Shader.cpp" />
+    <ClCompile Include="src\io\Gamepad.cpp" />
     <ClCompile Include="src\io\Joystick.cpp" />
     <ClCompile Include="src\io\Keyboard.cpp" />
     <ClCompile Include="src\io\Mouse.cpp" />
@@ -29,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\rendering\Shader.h" />
+    <ClInclude Include="src\io\Gamepad.h" />
     <ClInclude Include="src\io\Joystick.h" />
     <ClInclude Include="src\io\Keyboard.h" />
     <ClInclude Include="src\io\Mouse.h" />
