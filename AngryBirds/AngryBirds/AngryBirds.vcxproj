@@ -23,6 +23,7 @@
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="src\graphics\objects\Mesh.cpp" />
     <ClCompile Include="src\graphics\objects\Model.cpp" />
+    <ClCompile Include="src\graphics\rendering\Light.cpp" />
     <ClCompile Include="src\graphics\rendering\Material.cpp" />
     <ClCompile Include="src\graphics\rendering\Shader.cpp" />
     <ClCompile Include="src\graphics\rendering\Texture.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="src\graphics\models\Lamp.hpp" />
     <ClInclude Include="src\graphics\objects\Mesh.h" />
     <ClInclude Include="src\graphics\objects\Model.h" />
+    <ClInclude Include="src\graphics\rendering\Light.h" />
     <ClInclude Include="src\graphics\rendering\Material.h" />
     <ClInclude Include="src\graphics\rendering\Shader.h" />
     <ClInclude Include="src\graphics\rendering\Texture.h" />
@@ -58,6 +60,8 @@
     <None Include="resources\shaders\object.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resources\images\flag.png" />
+    <Image Include="resources\images\flag_specular.png" />
     <Image Include="resources\images\image1.jpg" />
     <Image Include="resources\images\image2.png" />
   </ItemGroup>

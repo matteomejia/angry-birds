@@ -57,6 +57,9 @@
     <ClCompile Include="src\graphics\rendering\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\rendering\Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\rendering\Shader.h">
@@ -98,6 +101,9 @@
     <ClInclude Include="src\graphics\models\Lamp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\rendering\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc143-mtd.dll" />
@@ -112,6 +118,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="resources\images\image1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\images\flag_specular.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\images\flag.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

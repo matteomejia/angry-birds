@@ -4,8 +4,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <assimp/scene.h>
-
 #include <stb_image.h>
 
 /*
@@ -19,43 +17,40 @@ public:
 	*/
 
 	// initialize with name
-	Texture(std::string name);
+	Texture();
 
 	// initialize with image path and type
-	Texture(std::string dir, std::string path, aiTextureType type);
+	Texture(const char* path, const char* name, bool defaultParams = true);
 
 	// generate texture id
 	void generate();
-
-	// load texture from path
 	void load(bool flip = true);
 
-	void allocate(GLenum format, GLuint width, GLuint height, GLenum type);
+	void setFilters(GLenum all);
+	void setFilters(GLenum mag, GLenum min);
 
-	static void setParams(GLenum texMinFilter = GL_NEAREST,
-		GLenum texMagFilter = GL_NEAREST,
-		GLenum wrapS = GL_REPEAT,
-		GLenum wrapT = GL_REPEAT);
+	void setWrap(GLenum all);
+	void setWrap(GLenum s, GLenum t);
 
-	// bind texture id
 	void bind();
-
-	void cleanup();
 
 	/*
 		texture object values
 	*/
 
 	// texture id
-	unsigned int id;
-	// texture type
-	aiTextureType type;
+	int id;
+	unsigned int tex;
 	// name
-	std::string name;
-	// directory of image
-	std::string dir;
-	// name of image
-	std::string path;
+	const char* name;
+
+private:
+	static int currentId;
+
+	const char* path;
+	int width;
+	int height;
+	int nChannels;
 };
 
 #endif
