@@ -1,7 +1,21 @@
 #include "Gamepad.h"
 
-Gamepad::Gamepad(int i) {
+#include <iostream>
+#include <fstream>
+
+Gamepad::Gamepad(int i, const char* mappingPath) {
 	id = getId(i);
+
+	std::ifstream t(mappingPath);
+	std::string mappings((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+	auto mappingSuccess = glfwUpdateGamepadMappings(mappings.c_str());
+	if (mappingSuccess == GLFW_TRUE) {
+		std::cout << "Controller successfully mapped" << std::endl;
+	}
+	else {
+		std::cout << "Controller not mapped" << std::endl;
+	}
+
 	update();
 }
 

@@ -5,7 +5,7 @@
 
 class Gamepad {
 public:
-	Gamepad(int i);
+	Gamepad(int i, const char *mappingPath);
 
 	void update();
 

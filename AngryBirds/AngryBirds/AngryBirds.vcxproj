@@ -21,25 +21,41 @@
   <ItemGroup>
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb_image.cpp" />
+    <ClCompile Include="src\graphics\objects\Mesh.cpp" />
+    <ClCompile Include="src\graphics\objects\Model.cpp" />
+    <ClCompile Include="src\graphics\rendering\Material.cpp" />
     <ClCompile Include="src\graphics\rendering\Shader.cpp" />
+    <ClCompile Include="src\graphics\rendering\Texture.cpp" />
+    <ClCompile Include="src\io\Camera.cpp" />
     <ClCompile Include="src\io\Gamepad.cpp" />
     <ClCompile Include="src\io\Joystick.cpp" />
     <ClCompile Include="src\io\Keyboard.cpp" />
     <ClCompile Include="src\io\Mouse.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Screen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\models\Cube.hpp" />
+    <ClInclude Include="src\graphics\models\Lamp.hpp" />
+    <ClInclude Include="src\graphics\objects\Mesh.h" />
+    <ClInclude Include="src\graphics\objects\Model.h" />
+    <ClInclude Include="src\graphics\rendering\Material.h" />
     <ClInclude Include="src\graphics\rendering\Shader.h" />
+    <ClInclude Include="src\graphics\rendering\Texture.h" />
+    <ClInclude Include="src\io\Camera.h" />
     <ClInclude Include="src\io\Gamepad.h" />
     <ClInclude Include="src\io\Joystick.h" />
     <ClInclude Include="src\io\Keyboard.h" />
     <ClInclude Include="src\io\Mouse.h" />
+    <ClInclude Include="src\Screen.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="glfw3.dll" />
-    <None Include="resources\shaders\fragment.glsl" />
-    <None Include="resources\shaders\vertex.glsl" />
+    <None Include="resources\shaders\lamp.frag" />
+    <None Include="resources\shaders\lamp.vert" />
+    <None Include="resources\shaders\object.frag" />
+    <None Include="resources\shaders\object.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\images\image1.jpg" />
