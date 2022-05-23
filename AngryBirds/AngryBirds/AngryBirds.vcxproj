@@ -33,11 +33,16 @@
     <ClCompile Include="src\io\Keyboard.cpp" />
     <ClCompile Include="src\io\Mouse.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\physics\Environment.cpp" />
+    <ClCompile Include="src\physics\RigidBody.cpp" />
     <ClCompile Include="src\Screen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\models\Cube.hpp" />
+    <ClInclude Include="src\graphics\models\Gun.hpp" />
     <ClInclude Include="src\graphics\models\Lamp.hpp" />
+    <ClInclude Include="src\graphics\models\ModelArray.hpp" />
+    <ClInclude Include="src\graphics\models\Sphere.hpp" />
     <ClInclude Include="src\graphics\objects\Mesh.h" />
     <ClInclude Include="src\graphics\objects\Model.h" />
     <ClInclude Include="src\graphics\rendering\Light.h" />
@@ -49,11 +54,14 @@
     <ClInclude Include="src\io\Joystick.h" />
     <ClInclude Include="src\io\Keyboard.h" />
     <ClInclude Include="src\io\Mouse.h" />
+    <ClInclude Include="src\physics\Environment.h" />
+    <ClInclude Include="src\physics\RigidBody.h" />
     <ClInclude Include="src\Screen.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="glfw3.dll" />
+    <None Include="resources\game\data\gamecontroller.db" />
     <None Include="resources\shaders\lamp.frag" />
     <None Include="resources\shaders\lamp.vert" />
     <None Include="resources\shaders\object.frag" />

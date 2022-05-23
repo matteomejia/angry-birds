@@ -4,53 +4,58 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <assimp/scene.h>
+
 #include <stb_image.h>
 
 /*
-	class to represent texture
+    class to represent texture
 */
 
 class Texture {
 public:
-	/*
-		constructor
-	*/
+    /*
+        constructor
+    */
 
-	// initialize with name
-	Texture();
+    // initialize with name
+    Texture(std::string name);
 
-	// initialize with image path and type
-	Texture(const char* path, const char* name, bool defaultParams = true);
+    // initialize with image path and type
+    Texture(std::string dir, std::string path, aiTextureType type);
 
-	// generate texture id
-	void generate();
-	void load(bool flip = true);
+    // generate texture id
+    void generate();
 
-	void setFilters(GLenum all);
-	void setFilters(GLenum mag, GLenum min);
+    // load texture from path
+    void load(bool flip = true);
 
-	void setWrap(GLenum all);
-	void setWrap(GLenum s, GLenum t);
+    void allocate(GLenum format, GLuint width, GLuint height, GLenum type);
 
-	void bind();
+    static void setParams(GLenum texMinFilter = GL_NEAREST,
+        GLenum texMagFilter = GL_NEAREST,
+        GLenum wrapS = GL_REPEAT,
+        GLenum wrapT = GL_REPEAT);
 
-	/*
-		texture object values
-	*/
+    // bind texture id
+    void bind();
 
-	// texture id
-	int id;
-	unsigned int tex;
-	// name
-	const char* name;
+    void cleanup();
 
-private:
-	static int currentId;
+    /*
+        texture object values
+    */
 
-	const char* path;
-	int width;
-	int height;
-	int nChannels;
+    // texture id
+    unsigned int id;
+    // texture type
+    aiTextureType type;
+    // name
+    std::string name;
+    // directory of image
+    std::string dir;
+    // name of image
+    std::string path;
 };
 
 #endif

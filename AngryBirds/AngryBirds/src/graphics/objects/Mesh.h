@@ -15,10 +15,8 @@ struct Vertex {
 	glm::vec3 normal;
 	glm::vec2 texCoord;
 
-	static std::vector<struct Vertex> genList(float* vertices, int noVertices);
+	static std::vector<Vertex> genList(float* vertices, int noVertices);
 };
-
-typedef struct Vertex Vertex;
 
 class Mesh {
 public:
@@ -27,9 +25,12 @@ public:
 	unsigned int VAO;
 
 	std::vector<Texture> textures;
+	aiColor4D diffuse;
+	aiColor4D specular;
 
 	Mesh();
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures = {});
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, aiColor4D diffuse, aiColor4D specular);
 
 	void render(Shader shader);
 
@@ -37,6 +38,8 @@ public:
 
 private:
 	unsigned int VBO, EBO;
+
+	bool noTex;
 
 	void setup();
 };

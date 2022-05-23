@@ -4,22 +4,29 @@
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
 
+#include <string>
+#include <vector>
+#include <stack>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "graphics/rendering/Shader.h"
 #include "graphics/rendering/Texture.h"
+#include "graphics/rendering/Light.h"
+
+#include "graphics/objects/Model.h"
 
 #include "io/Keyboard.h"
 #include "io/Mouse.h"
 #include "io/Gamepad.h"
 #include "io/Camera.h"
 
-#include "graphics/rendering/Light.h"
-
 #include "graphics/models/Cube.hpp"
 #include "graphics/models/Lamp.hpp"
+#include "graphics/models/Gun.hpp"
+#include "graphics/models/Sphere.hpp"
 
 #include "Screen.h"
 
@@ -30,18 +37,17 @@ unsigned int SCR_HEIGHT = 600;
 
 Screen screen;
 
-std::string Shader::defaultDirectory = "resources/shaders";
+//Gamepad mainG(0, "resources/game/data/gamecontroller.db");
+Camera Camera::defaultCamera(glm::vec3(0.0f, 0.0f, 0.0f));
 
-float mixVal = 0.5f;
-
-glm::mat4 mouseTranform = glm::mat4(1.0f);
-
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-
-float deltaTime = 0.0f;
+float dt = 0.0f;
 float lastFrame = 0.0f;
 
 bool flashLightOn = true;
+
+SphereArray launchObjects;
+
+std::string Shader::defaultDirectory = "resources/shaders";
 
 int main() {
 	// Inicializacion de glfw
@@ -70,24 +76,13 @@ int main() {
 	Shader shader(false, "object.vert", "object.frag");
 	Shader lampShader(false, "object.vert", "lamp.frag");
 
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
+	launchObjects.init();
 
-	Cube cubes[10];
-	for (unsigned int i = 0; i < 10; i++) {
-		cubes[i] = Cube(Material::gold, cubePositions[i], glm::vec3(1.0f));
-		cubes[i].init();
-	}
+	DirLight dirLight = { glm::vec3(-0.2f, -1.0f, -0.3f),
+		glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
+		glm::vec4(0.4f, 0.4f, 0.4f, 1.0f),
+		glm::vec4(0.75f, 0.75f, 0.75f, 1.0f)
+	};
 
 	glm::vec3 pointLightPositions[] = {
 			glm::vec3(0.7f,  0.2f,  2.0f),
@@ -95,49 +90,64 @@ int main() {
 			glm::vec3(-4.0f,  2.0f, -12.0f),
 			glm::vec3(0.0f,  0.0f, -3.0f)
 	};
-	Lamp lamps[4];
+
+	glm::vec4 ambient = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+	glm::vec4 diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	glm::vec4 specular = glm::vec4(1.0f);
+
+	float k0 = 1.0f;
+	float k1 = 0.09f;
+	float k2 = 0.032f;
+
+	/*Lamp lamps[4];
 	for (unsigned int i = 0; i < 4; i++) {
 		lamps[i] = Lamp(glm::vec3(1.0f),
-			glm::vec3(0.05f), glm::vec3(0.8f), glm::vec3(1.0f),
-			1.0f, 0.07f, 0.032f,
+			ambient, diffuse, specular,
+			k0, k1, k2,
 			pointLightPositions[i], glm::vec3(0.25f));
 		lamps[i].init();
+	}*/
+
+	LampArray lamps;
+	lamps.init();
+	for (unsigned int i = 0; i < 4; i++) {
+		lamps.lightInstances.push_back({
+			pointLightPositions[i], k0, k1, k2, ambient, diffuse, specular });
 	}
 
-	DirLight dirLight = { glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f), glm::vec3(0.4f), glm::vec3(0.75f) };
-
 	SpotLight s = {
-		camera.cameraPos, camera.cameraFront,
+		Camera::defaultCamera.cameraPos, Camera::defaultCamera.cameraFront,
 		glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(20.0f)),
 		1.0f, 0.07f, 0.032f,
-		glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f)
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
 	};
 
 	while (!screen.shouldClose()) {
 		double currentTime = glfwGetTime();
-		deltaTime = currentTime - lastFrame;
+		dt = currentTime - lastFrame;
 		lastFrame = currentTime;
 
-		processInput(deltaTime);
+		processInput(dt);
 
 		screen.update();
 
 		shader.activate();
-		shader.set3Float("viewPos", camera.cameraPos);
+		shader.set3Float("viewPos", Camera::defaultCamera.cameraPos);
 
 		dirLight.direction = glm::vec3(
 			glm::rotate(glm::mat4(1.0f), glm::radians(0.5f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(dirLight.direction, 1.0f)
 		);
 		dirLight.render(shader);
 
-		for (int i = 0; i < 4; i++) {
-			lamps[i].pointLight.render(shader, i);
+		for (unsigned int i = 0; i < 4; i++) {
+			lamps.lightInstances[i].render(shader, i);
 		}
+
 		shader.setInt("noPointLights", 4);
 
 		if (flashLightOn) {
-			s.position = camera.cameraPos;
-			s.direction = camera.cameraFront;
+			s.position = Camera::defaultCamera.cameraPos;
+			s.direction = Camera::defaultCamera.cameraFront;
 			s.render(shader, 0);
 			shader.setInt("noSpotLights", 1);
 		}
@@ -148,37 +158,52 @@ int main() {
 		// transformation for screen
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
-		view = camera.getViewMatrix();
-		projection = glm::perspective(glm::radians(camera.getZoom()), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		view = Camera::defaultCamera.getViewMatrix();
+		projection = glm::perspective(glm::radians(Camera::defaultCamera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
 
-		for (int i = 0; i < 10; i++) {
-			cubes[i].render(shader);
+		std::stack<int> removeObjects;
+		for (int i = 0; i < launchObjects.instances.size(); i++) {
+			if (glm::length(Camera::defaultCamera.cameraPos - launchObjects.instances[i].pos) > 50.0f) {
+				removeObjects.push(i);
+				continue;
+			}
+		}
+
+		for (int i = 0; i < removeObjects.size(); i++) {
+			launchObjects.instances.erase(launchObjects.instances.begin() + removeObjects.top());
+			removeObjects.pop();
+		}
+
+		if (launchObjects.instances.size() > 0) {
+			launchObjects.render(shader, dt);
 		}
 
 		lampShader.activate();
 		lampShader.setMat4("view", view);
 		lampShader.setMat4("projection", projection);
-		for (int i = 0; i < 4; i++) {
-			lamps[i].render(lampShader);
-		}
+
+		lamps.render(lampShader, dt);
 
 		screen.newFrame();
 	}
 
-	for (int i = 0; i < 10; i++) {
-		cubes[i].cleanup();
-	}
+	lamps.cleanup();
 
-	for (int i = 0; i < 4; i++) {
-		lamps[i].cleanup();
-	}
+	launchObjects.cleanup();
 
 	glfwTerminate();
 	return 0;
 }
+
+void launchItem(float dt) {
+	RigidBody rb(1.0f, Camera::defaultCamera.cameraPos);
+	rb.applyImpulse(Camera::defaultCamera.cameraFront, 1000.0f, dt);
+	rb.applyAcceleration(Environment::gravitationalAcceleration);
+	launchObjects.instances.push_back(rb);
+};
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
@@ -191,37 +216,41 @@ void processInput(double dt) {
 	}
 
 	if (Keyboard::key(GLFW_KEY_W)) {
-		camera.updateCameraPos(CameraDirection::FORWARD, dt);
+		Camera::defaultCamera.updateCameraPos(CameraDirection::FORWARD, dt);
 	}
 
 	if (Keyboard::key(GLFW_KEY_S)) {
-		camera.updateCameraPos(CameraDirection::BACKWARD, dt);
+		Camera::defaultCamera.updateCameraPos(CameraDirection::BACKWARD, dt);
 	}
 
 	if (Keyboard::key(GLFW_KEY_A)) {
-		camera.updateCameraPos(CameraDirection::LEFT, dt);
+		Camera::defaultCamera.updateCameraPos(CameraDirection::LEFT, dt);
 	}
 
 	if (Keyboard::key(GLFW_KEY_D)) {
-		camera.updateCameraPos(CameraDirection::RIGHT, dt);
+		Camera::defaultCamera.updateCameraPos(CameraDirection::RIGHT, dt);
 	}
 
 	if (Keyboard::key(GLFW_KEY_SPACE)) {
-		camera.updateCameraPos(CameraDirection::UP, dt);
+		Camera::defaultCamera.updateCameraPos(CameraDirection::UP, dt);
 	}
 
 	if (Keyboard::key(GLFW_KEY_LEFT_CONTROL)) {
-		camera.updateCameraPos(CameraDirection::DOWN, dt);
+		Camera::defaultCamera.updateCameraPos(CameraDirection::DOWN, dt);
 	}
 
 	double dx = Mouse::getDX(), dy = Mouse::getDY();
 
 	if (dx != 0 || dy != 0) {
-		camera.updateCameraDirection(dx, dy);
+		Camera::defaultCamera.updateCameraDirection(dx, dy);
 	}
 
 	double scrollDy = Mouse::getScrollDY();
 	if (scrollDy != 0) {
-		camera.updateCameraZoom(scrollDy);
+		Camera::defaultCamera.updateCameraZoom(scrollDy);
+	}
+
+	if (Keyboard::keyWentDown(GLFW_KEY_L)) {
+		launchItem(dt);
 	}
 }

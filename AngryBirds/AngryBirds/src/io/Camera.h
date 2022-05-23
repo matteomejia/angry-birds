@@ -31,6 +31,7 @@ public:
     /*
         camera values
     */
+    static Camera defaultCamera;
 
     // position
     glm::vec3 cameraPos;
@@ -42,13 +43,10 @@ public:
 
     glm::vec3 worldUp;
 
-    // camera rotational values
     float yaw;   // x-axis
     float pitch; // y-axis
-
-    // camera movement values
     float speed;
-    //float sensitivity;
+    float sensitivity;
     float zoom;
 
     /*
@@ -75,10 +73,10 @@ public:
         accessors
     */
 
-    float getZoom();
-
     // get view matrix for camera
     glm::mat4 getViewMatrix();
+
+    float getZoom();
 
 private:
     /*
