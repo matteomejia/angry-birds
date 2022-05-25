@@ -32,12 +32,13 @@ void RigidBody::applyImpulse(glm::vec3 direction, float magnitude, float dt) {
 	applyImpulse(direction * magnitude, dt);
 }
 
-void RigidBody::transferEnergy(float joules) {
+void RigidBody::transferEnergy(float joules, glm::vec3 direction) {
 	if (joules == 0) {
 		return;
 	}
 
-	float deltaV = sqrt(2 * abs(joules) / mass);
+	// comes from formula: KE = 1/2 * m * v^2
+	glm::vec3 deltaV = sqrt(2 * abs(joules) / mass) * direction;
 
 	velocity += joules > 0 ? deltaV : -deltaV;
 }

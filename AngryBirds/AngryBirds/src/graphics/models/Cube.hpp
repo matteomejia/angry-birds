@@ -11,7 +11,8 @@ public:
 
 	Material material;
 
-	Cube(glm::vec3 pos = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f)) : Model(pos, size) {};
+	Cube(glm::vec3 pos = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f)) 
+		: Model(BoundTypes::AABB, pos, size) {};
 
 	void init() {
 		int noVertices = 36;
@@ -71,11 +72,9 @@ public:
 		Texture flagSpec("resources/images/flag_specular.png", "material.specular");
 		flagSpec.load();*/
 
-		meshes.push_back(Mesh(Vertex::genList(vertices, noVertices), indices));
-	}
+		BoundingRegion br(glm::vec3(-0.5f), glm::vec3(0.5f));
 
-	void render(Shader shader, float dt) {
-		Model::render(shader, dt);
+		meshes.push_back(Mesh(br, Vertex::genList(vertices, noVertices), indices));
 	}
 };
 

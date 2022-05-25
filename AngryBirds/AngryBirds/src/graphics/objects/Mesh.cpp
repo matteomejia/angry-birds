@@ -1,6 +1,5 @@
 #include "Mesh.h"
 
-
 std::vector<Vertex> Vertex::genList(float* vertices, int noVertices) {
 	std::vector<Vertex> ret(noVertices);
 
@@ -28,29 +27,33 @@ std::vector<Vertex> Vertex::genList(float* vertices, int noVertices) {
 	return ret;
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
-	: vertices(vertices), indices(indices), textures(textures), noTex(false) {
+Mesh::Mesh(BoundingRegion br, std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+	: br(br), vertices(vertices), indices(indices), textures(textures), noTex(false) {
 	setup();
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, aiColor4D diffuse, aiColor4D specular)
-	: vertices(vertices), indices(indices), diffuse(diffuse), specular(specular), noTex(true) {
+Mesh::Mesh(BoundingRegion br, std::vector<Vertex> vertices, std::vector<unsigned int> indices, aiColor4D diffuse, aiColor4D specular)
+	: br(br), vertices(vertices), indices(indices), diffuse(diffuse), specular(specular), noTex(true) {
 	setup();
 }
 
-void Mesh::render(Shader shader) {
+void Mesh::render(Shader shader, glm::vec3 pos, glm::vec3 size, Box* box, bool doRender) {
 	if (noTex) {
+		// materials
 		shader.set4Float("material.diffuse", diffuse);
 		shader.set4Float("material.specular", specular);
 		shader.setInt("noTex", 1);
 	}
 	else {
+		// textures
 		unsigned int diffuseIdx = 0;
 		unsigned int specularIdx = 0;
 
 		for (unsigned int i = 0; i < textures.size(); i++) {
+			// activate texture
 			glActiveTexture(GL_TEXTURE0 + i);
 
+			// retrieve texture info
 			std::string name;
 			switch (textures[i].type) {
 			case aiTextureType_DIFFUSE:
@@ -61,46 +64,57 @@ void Mesh::render(Shader shader) {
 				break;
 			}
 
+			// set the shader value
 			shader.setInt(name, i);
+			// bind texture
 			textures[i].bind();
 		}
 	}
 
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	if (doRender) {
+		box->addInstance(br, pos, size);
 
-	glActiveTexture(GL_TEXTURE0);
-}
+		VAO.bind();
+		VAO.draw(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		ArrayObject::clear();
 
-void Mesh::cleanup() {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+		// reset
+		glActiveTexture(GL_TEXTURE0);
+	}
 }
 
 void Mesh::setup() {
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	// create buffers/arrays
 
-	glBindVertexArray(VAO);
+	// bind VAO
+	VAO.generate();
+	VAO.bind();
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	// generate/set EBO
+	VAO["EBO"] = BufferObject(GL_ELEMENT_ARRAY_BUFFER);
+	VAO["EBO"].generate();
+	VAO["EBO"].bind();
+	VAO["EBO"].setData<GLuint>(indices.size(), &indices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	// generate/set VBO
+	VAO["VBO"] = BufferObject(GL_ARRAY_BUFFER);
+	VAO["VBO"].generate();
+	VAO["VBO"].bind();
+	VAO["VBO"].setData<Vertex>(vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
-	// attrib pointers
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+	// set vertex attrib pointers
+	// vertex positions
+	VAO["VBO"].setAttPointer<GLfloat>(0, 3, GL_FLOAT, 8, 0);
+	// normal ray
+	VAO["VBO"].setAttPointer<GLfloat>(1, 3, GL_FLOAT, 8, 3);
+	// texture coordinates
+	VAO["VBO"].setAttPointer<GLfloat>(2, 2, GL_FLOAT, 8, 6);
 
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+	VAO["VBO"].clear();
 
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+	ArrayObject::clear();
+}
 
-	glBindVertexArray(0);
+void Mesh::cleanup() {
+	VAO.cleanup();
 }

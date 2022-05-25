@@ -31,7 +31,6 @@ public:
     /*
         camera values
     */
-    static Camera defaultCamera;
 
     // position
     glm::vec3 cameraPos;
@@ -54,7 +53,7 @@ public:
     */
 
     // default and initialize with position
-    Camera(glm::vec3 position);
+    Camera(glm::vec3 position = glm::vec3(0.0f));
 
     /*
         modifiers
