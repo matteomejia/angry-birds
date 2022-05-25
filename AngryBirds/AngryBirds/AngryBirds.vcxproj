@@ -22,6 +22,7 @@
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="src\algorithms\Bounds.cpp" />
+    <ClCompile Include="src\algorithms\Octree.cpp" />
     <ClCompile Include="src\graphics\objects\Mesh.cpp" />
     <ClCompile Include="src\graphics\objects\Model.cpp" />
     <ClCompile Include="src\graphics\rendering\Light.cpp" />
@@ -40,13 +41,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\algorithms\Bounds.h" />
+    <ClInclude Include="src\algorithms\List.hpp" />
+    <ClInclude Include="src\algorithms\Octree.h" />
     <ClInclude Include="src\algorithms\States.hpp" />
     <ClInclude Include="src\graphics\memory\GlMemory.hpp" />
     <ClInclude Include="src\graphics\models\Box.hpp" />
     <ClInclude Include="src\graphics\models\Cube.hpp" />
     <ClInclude Include="src\graphics\models\Gun.hpp" />
     <ClInclude Include="src\graphics\models\Lamp.hpp" />
-    <ClInclude Include="src\graphics\models\ModelArray.hpp" />
     <ClInclude Include="src\graphics\models\Sphere.hpp" />
     <ClInclude Include="src\graphics\objects\Mesh.h" />
     <ClInclude Include="src\graphics\objects\Model.h" />
@@ -67,13 +69,10 @@
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="glfw3.dll" />
     <None Include="resources\game\data\gamecontroller.db" />
-    <None Include="resources\shaders\basic.frag" />
-    <None Include="resources\shaders\basic.vert" />
     <None Include="resources\shaders\instanced\box.frag" />
     <None Include="resources\shaders\instanced\box.vert" />
     <None Include="resources\shaders\instanced\instanced.vert" />
     <None Include="resources\shaders\lamp.frag" />
-    <None Include="resources\shaders\lamp.vert" />
     <None Include="resources\shaders\object.frag" />
     <None Include="resources\shaders\object.vert" />
   </ItemGroup>

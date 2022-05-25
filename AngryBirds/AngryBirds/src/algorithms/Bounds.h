@@ -26,7 +26,7 @@ public:
 	*/
 
 	// initialize with type
-	BoundingRegion(BoundTypes type);
+	BoundingRegion(BoundTypes type = BoundTypes::AABB);
 
 	// initialize as sphere
 	BoundingRegion(glm::vec3 center, float radius);
@@ -56,6 +56,9 @@ public:
 
 	// determine if region intersects (partial containment)
 	bool intersectsWith(BoundingRegion br);
+
+	// operator overload
+	bool operator==(BoundingRegion br);
 };
 
 #endif
