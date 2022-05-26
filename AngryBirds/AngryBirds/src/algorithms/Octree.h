@@ -11,6 +11,13 @@
 #include "List.hpp"
 #include "States.hpp"
 #include "Bounds.h"
+#include "Trie.hpp"
+
+#include "../graphics/objects/Model.h"
+
+class Model;
+class BoundingRegion;
+class Box;
 
 namespace Octree {
 	enum class Octant : unsigned char {
@@ -24,7 +31,7 @@ namespace Octree {
 		O8 = 0x80,
 	};
 
-	void calculateBounds(BoundingRegion* out, Octant octant, BoundingRegion parentRegion);
+	void calculateBounds(BoundingRegion& out, Octant octant, BoundingRegion parentRegion);
 
 	class node {
 	public:
@@ -34,10 +41,11 @@ namespace Octree {
 
 		unsigned char activeOctants;
 
-		bool hasChildren = false;
-
 		bool treeReady = false;
 		bool treeBuilt = false;
+
+		short maxLifeSpan = 8;
+		short currentLifeSpan = -1;
 
 		std::vector<BoundingRegion> objects;
 		std::queue<BoundingRegion> queue;
@@ -49,13 +57,20 @@ namespace Octree {
 
 		node(BoundingRegion bounds, std::vector<BoundingRegion> objectList);
 
+		void addToPending(RigidBody* instance, trie::Trie<Model*> models);
+
 		void build();
 
-		void update();
+		void update(Box& box);
 
 		void processPending();
 
 		bool insert(BoundingRegion obj);
+
+		// collisions
+		void checkCollisionsSelf(BoundingRegion obj);
+
+		void checkCollisionsChildren(BoundingRegion obj);
 
 		void destroy();
 	};

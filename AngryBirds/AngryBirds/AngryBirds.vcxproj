@@ -44,6 +44,7 @@
     <ClInclude Include="src\algorithms\List.hpp" />
     <ClInclude Include="src\algorithms\Octree.h" />
     <ClInclude Include="src\algorithms\States.hpp" />
+    <ClInclude Include="src\algorithms\Trie.hpp" />
     <ClInclude Include="src\graphics\memory\GlMemory.hpp" />
     <ClInclude Include="src\graphics\models\Box.hpp" />
     <ClInclude Include="src\graphics\models\Cube.hpp" />

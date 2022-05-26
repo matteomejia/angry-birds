@@ -68,6 +68,9 @@ int main() {
 
 	scene.registerModel(&sphere);
 
+	Box box;
+	box.init();
+
 	scene.loadModels();
 
 	// LIGHTS
@@ -119,6 +122,8 @@ int main() {
 		std::cout << mainJ.getName() << " is present." << std::endl;
 	}*/
 
+	scene.prepare(box);
+
 	while (!scene.shouldClose()) {
 		// calculate dt
 		double currentTime = glfwGetTime();
@@ -134,13 +139,9 @@ int main() {
 		// remove launch objects if too far
 		std::stack<unsigned int> removeObjects;
 		for (int i = 0; i < sphere.currentNoInstances; i++) {
-			if (glm::length(cam.cameraPos - sphere.instances[i].pos) > 250.0f) {
-				removeObjects.push(i);
+			if (glm::length(cam.cameraPos - sphere.instances[i]->pos) > 250.0f) {
+				scene.markForDeletion(sphere.instances[i]->instanceId);
 			}
-		}
-		while (removeObjects.size() != 0) {
-			sphere.removeInstance(removeObjects.top());
-			removeObjects.pop();
 		}
 
 		// render launch objects
@@ -150,11 +151,15 @@ int main() {
 		}
 
 		// render lamps
-		scene.renderShader(lampShader);
+		scene.renderShader(lampShader, false);
 		scene.renderInstances(lamp.id, lampShader, dt);
 
+		scene.renderShader(boxShader, false);
+		box.render(boxShader);
+
 		// send new frame to window
-		scene.newFrame();
+		scene.newFrame(box);
+		scene.clearDeadInstances();
 	}
 
 	scene.cleanup();
@@ -162,11 +167,11 @@ int main() {
 }
 
 void launchItem(float dt) {
-	std::string id = scene.generateInstance(sphere.id, glm::vec3(1.0f), 1.0f, cam.cameraPos);
-	if (id != "") {
+	RigidBody* rb = scene.generateInstance(sphere.id, glm::vec3(0.1f), 1.0f, cam.cameraPos);
+	if (rb) {
 		// instance generated
-		sphere.instances[scene.instances[id].second].transferEnergy(100.0f, cam.cameraFront);
-		sphere.instances[scene.instances[id].second].applyAcceleration(Environment::gravitationalAcceleration);
+		rb->transferEnergy(1000.0f, cam.cameraFront);
+		rb->applyAcceleration(Environment::gravitationalAcceleration);
 	}
 }
 

@@ -1,20 +1,35 @@
 #include "Bounds.h"
 
+#include "Octree.h"
+
 // initialize with type
 BoundingRegion::BoundingRegion(BoundTypes type)
 	: type(type) {}
 
 // initialize as sphere
 BoundingRegion::BoundingRegion(glm::vec3 center, float radius)
-	: type(BoundTypes::SPHERE), center(center), radius(radius) {}
+	: type(BoundTypes::SPHERE), center(center), radius(radius), ogCenter(center), ogRadius(radius) {}
 
 // initialize as AABB
 BoundingRegion::BoundingRegion(glm::vec3 min, glm::vec3 max)
-	: type(BoundTypes::AABB), min(min), max(max) {}
+	: type(BoundTypes::AABB), min(min), max(max), ogMin(min), ogMax(max) {}
 
 /*
 	Calculating values for the region
 */
+
+void BoundingRegion::transform() {
+	if (instance) {
+		if (type == BoundTypes::AABB) {
+			min = ogMin * instance->size + instance->pos;
+			max = ogMax * instance->size + instance->pos;
+		}
+		else {
+			center = ogCenter * instance->size + instance->pos;
+			radius = ogRadius * instance->size.x;
+		}
+	}
+}
 
 // center
 glm::vec3 BoundingRegion::calculateCenter() {
@@ -36,7 +51,7 @@ bool BoundingRegion::containsPoint(glm::vec3 pt) {
 		// box - point must be larger than man and smaller than max
 		return (pt.x >= min.x) && (pt.x <= max.x) &&
 			(pt.y >= min.y) && (pt.y <= max.y) &&
-			(pt.z >= min.z) && (pt.z <= min.z);
+			(pt.z >= min.z) && (pt.z <= max.z);
 	}
 	else {
 		// sphere - distance must be less than radius
@@ -120,15 +135,8 @@ bool BoundingRegion::intersectsWith(BoundingRegion br) {
 		// find distance (squared) to the closest plane
 		float distSquared = 0.0f;
 		for (int i = 0; i < 3; i++) {
-			if (center[i] < br.min[i]) {
-				// beyond min
-				distSquared += (br.min[i] - center[i]) * (br.min[i] * center[i]);
-			}
-			else if (center[i] > br.max[i]) {
-				// beyond max
-				distSquared += (center[i] - br.max[i]) * (center[i] - br.max[i]);
-			}
-			// else inside
+			float closestPt = std::max(br.min[i], std::min(center[i], br.max[i]));
+			distSquared += (closestPt - center[i]) * (closestPt - center[i]);
 		}
 
 		return distSquared < (radius* radius);
