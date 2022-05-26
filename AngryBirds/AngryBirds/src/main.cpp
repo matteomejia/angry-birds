@@ -18,6 +18,7 @@
 #include "graphics/models/Cube.hpp"
 #include "graphics/models/Lamp.hpp"
 #include "graphics/models/Gun.hpp"
+#include "graphics/models/AngryBird.hpp"
 #include "graphics/models/Sphere.hpp"
 #include "graphics/models/Box.hpp"
 #include "graphics/rendering/Shader.h"
@@ -46,6 +47,8 @@ double lastFrame = 0.0f; // time of last frame
 
 Sphere sphere(10);
 
+AngryBird bird(10);
+
 int main() {
 	scene = Scene(3, 3, "Angry Birds", 800, 600);
 	if (!scene.init()) {
@@ -64,9 +67,10 @@ int main() {
 
 	// MODELS==============================
 	Lamp lamp(4);
-	scene.registerModel(&lamp);
 
+	scene.registerModel(&lamp);
 	scene.registerModel(&sphere);
+	scene.registerModel(&bird);
 
 	Box box;
 	box.init();
@@ -138,16 +142,16 @@ int main() {
 
 		// remove launch objects if too far
 		std::stack<unsigned int> removeObjects;
-		for (int i = 0; i < sphere.currentNoInstances; i++) {
-			if (glm::length(cam.cameraPos - sphere.instances[i]->pos) > 250.0f) {
-				scene.markForDeletion(sphere.instances[i]->instanceId);
+		for (int i = 0; i < bird.currentNoInstances; i++) {
+			if (glm::length(cam.cameraPos - bird.instances[i]->pos) > 250.0f) {
+				scene.markForDeletion(bird.instances[i]->instanceId);
 			}
 		}
 
 		// render launch objects
-		if (sphere.currentNoInstances > 0) {
+		if (bird.currentNoInstances > 0) {
 			scene.renderShader(shader);
-			scene.renderInstances(sphere.id, shader, dt);
+			scene.renderInstances(bird.id, shader, dt);
 		}
 
 		// render lamps
@@ -175,6 +179,15 @@ void launchItem(float dt) {
 	}
 }
 
+RigidBody* launchBird(float dt) {
+	RigidBody* rb = scene.generateInstance(bird.id, glm::vec3(0.05f), 1.0f, cam.cameraPos);
+	if (rb) {
+		rb->transferEnergy(1000.0f, cam.cameraFront);
+		rb->applyAcceleration(Environment::gravitationalAcceleration);
+	}
+	return rb;
+}
+
 void processInput(double dt) {
 	scene.processInput(dt);
 
@@ -193,7 +206,7 @@ void processInput(double dt) {
 	}
 
 	if (Mouse::buttonWentDown(GLFW_MOUSE_BUTTON_1)) {
-		launchItem(dt);
+		RigidBody* oneBird = launchBird(dt);
 	}
 
 	for (int i = 0; i < 4; i++) {
